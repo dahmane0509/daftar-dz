@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +17,16 @@ void main() {
   runApp(const DaftarDzApp());
 }
 
+// ---------------------------------------------------------------------------
+// Luxury "Mihrab-Inspired" Royal Navy + Cyan Glow + Golden Orange Palette
+// ---------------------------------------------------------------------------
+const Color kNavyDeep = Color(0xFF0A192F);
+const Color kNavyMid = Color(0xFF112240);
+const Color kNavySurface = Color(0xFF172A45);
+const Color kCyanGlow = Color(0xFF00E5FF);
+const Color kOrangeGold = Color(0xFFFF9100);
+const Color kEmeraldBright = Color(0xFF00E676);
+
 class DaftarDzApp extends StatelessWidget {
   const DaftarDzApp({super.key});
 
@@ -26,17 +37,83 @@ class DaftarDzApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0F5132),
-          primary: const Color(0xFF0F5132),
-          secondary: const Color(0xFFD4AF37),
-          surface: const Color(0xFFF8F9FA),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: kNavyDeep,
+        colorScheme: const ColorScheme.dark(
+          primary: kCyanGlow,
+          secondary: kOrangeGold,
+          surface: kNavyMid,
+          onPrimary: kNavyDeep,
+          onSecondary: kNavyDeep,
+          onSurface: Colors.white,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F5132),
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           centerTitle: true,
-          elevation: 2,
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          color: kNavyMid.withValues(alpha: 0.78),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: kCyanGlow.withValues(alpha: 0.28),
+              width: 1,
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: kNavyDeep.withValues(alpha: 0.65),
+          labelStyle: const TextStyle(color: Colors.white70),
+          hintStyle: const TextStyle(color: Colors.white38),
+          helperStyle: const TextStyle(color: kCyanGlow),
+          suffixStyle: const TextStyle(
+              color: kOrangeGold, fontWeight: FontWeight.bold, fontSize: 11),
+          prefixIconColor: kCyanGlow,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: kCyanGlow.withValues(alpha: 0.35)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: kOrangeGold, width: 1.8),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: kNavyMid,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: kCyanGlow.withValues(alpha: 0.5), width: 1.4),
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          indicatorColor: kCyanGlow.withValues(alpha: 0.22),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: kOrangeGold, size: 26);
+            }
+            return const IconThemeData(color: Colors.white70, size: 23);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                color: kCyanGlow,
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+            );
+          }),
         ),
       ),
       builder: (context, child) {
@@ -487,11 +564,96 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     await prefs.setBool('catalog_wholesale', _catalogWholesaleMode);
   }
 
-  // Expected license key formula: "PRO-" + (numeric part of deviceCode * 7 + 509)
   String _expectedKeyFor(String devCode) {
     final digits =
         int.tryParse(devCode.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1000;
     return 'PRO-${digits * 7 + 509}';
+  }
+
+  // -------------------------------------------------------------------------
+  // Glassmorphism Reusable Container Helper
+  // -------------------------------------------------------------------------
+  Widget _glassContainer({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(14),
+    EdgeInsetsGeometry? margin,
+    Color borderColor = kCyanGlow,
+    double borderOpacity = 0.38,
+    double borderRadius = 18,
+    List<Color>? gradientColors,
+  }) {
+    return Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: borderColor.withValues(alpha: 0.14),
+            blurRadius: 14,
+            spreadRadius: 0.5,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: padding,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: gradientColors ??
+                    [
+                      Colors.white.withValues(alpha: 0.12),
+                      kNavyMid.withValues(alpha: 0.78),
+                    ],
+              ),
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: Border.all(
+                color: borderColor.withValues(alpha: borderOpacity),
+                width: 1.3,
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrandLogo({double size = 44}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: kCyanGlow, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: kCyanGlow.withValues(alpha: 0.35),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        'assets/logo.jpg',
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [kNavyDeep, kNavyMid],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Icon(Icons.trending_up, color: kOrangeGold),
+        ),
+      ),
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -507,7 +669,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تعذر فتح تطبيق واتساب على هذا الجهاز.'),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.redAccent,
         ),
       );
     }
@@ -529,7 +691,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تعذر فتح تطبيق الرسائل القصيرة SMS.'),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.redAccent,
         ),
       );
     }
@@ -564,7 +726,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('تعذر التقاط أو اختيار الصورة: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.redAccent,
           ),
         );
       }
@@ -590,16 +752,18 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: Dialog(
-          backgroundColor: Colors.black87,
+          backgroundColor: kNavyDeep,
           insetPadding: const EdgeInsets.all(16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: kCyanGlow, width: 1.5),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -618,13 +782,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           Text(
                             'التصنيف: ${product.category} | جملة: ${product.wholesalePrice.toStringAsFixed(0)} د.ج | تجزئة: ${product.retailPrice.toStringAsFixed(0)} د.ج',
                             style: const TextStyle(
-                                color: Color(0xFFD4AF37), fontSize: 12),
+                                color: kOrangeGold, fontSize: 12),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: kCyanGlow),
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
@@ -633,7 +797,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               Flexible(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(16)),
+                      bottom: Radius.circular(20)),
                   child: InteractiveViewer(
                     minScale: 0.8,
                     maxScale: 4.0,
@@ -651,7 +815,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  Widget _buildProductThumbnail(ProductItem p, {double size = 48}) {
+  Widget _buildProductThumbnail(ProductItem p, {double size = 50}) {
     final hasImg = p.imagePath != null && File(p.imagePath!).existsSync();
     return GestureDetector(
       onTap: () => _showImageZoomDialog(p),
@@ -659,14 +823,22 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F5132).withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: hasImg
-                ? const Color(0xFFD4AF37)
-                : const Color(0xFF0F5132).withValues(alpha: 0.25),
-            width: 1.2,
+          gradient: const LinearGradient(
+            colors: [kNavySurface, kNavyDeep],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasImg ? kOrangeGold : kCyanGlow.withValues(alpha: 0.45),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: (hasImg ? kOrangeGold : kCyanGlow).withValues(alpha: 0.2),
+              blurRadius: 6,
+            ),
+          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: hasImg
@@ -683,18 +855,18 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
+                        color: Colors.black87,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Icon(Icons.zoom_in,
-                          size: 12, color: Colors.white),
+                          size: 12, color: kCyanGlow),
                     ),
                   ),
                 ],
               )
             : const Icon(
                 Icons.inventory_2_outlined,
-                color: Color(0xFF0F5132),
+                color: kCyanGlow,
                 size: 24,
               ),
       ),
@@ -702,7 +874,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   // -------------------------------------------------------------------------
-  // Feature 8: Global Store Settings Dialog (Header for Invoices & Catalogs)
+  // Feature 8: Global Store Settings Dialog
   // -------------------------------------------------------------------------
   void _showStoreSettingsDialog() {
     final compCtrl = TextEditingController(text: _companyName);
@@ -716,12 +888,15 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         child: AlertDialog(
           title: const Row(
             children: [
-              Icon(Icons.storefront, color: Color(0xFF0F5132)),
+              Icon(Icons.storefront, color: kOrangeGold),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'إعدادات المؤسسة وترويسة الفواتير',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
               ),
             ],
@@ -732,7 +907,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               children: [
                 const Text(
                   'تظهر هذه البيانات في ترويسة جميع الفواتير، عروض الأسعار (Devis)، كشوف الحساب، والكتالوج المصور PDF:',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -740,7 +915,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   decoration: const InputDecoration(
                     labelText: 'اسم المؤسسة أو المحل التجاري',
                     prefixIcon: Icon(Icons.business),
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -750,7 +924,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   decoration: const InputDecoration(
                     labelText: 'رقم الهاتف للتواصل والطلبات',
                     prefixIcon: Icon(Icons.phone),
-                    border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -759,7 +932,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   decoration: const InputDecoration(
                     labelText: 'الولاية / العنوان التجاري',
                     prefixIcon: Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(),
                   ),
                 ),
               ],
@@ -768,12 +940,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('إلغاء'),
+              child: const Text('إلغاء', style: TextStyle(color: Colors.white70)),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F5132),
-                foregroundColor: Colors.white,
+                backgroundColor: kOrangeGold,
+                foregroundColor: kNavyDeep,
               ),
               onPressed: () {
                 setState(() {
@@ -788,12 +960,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('تم حفظ إعدادات المؤسسة بنجاح ✅'),
-                    backgroundColor: Color(0xFF0F5132),
+                    backgroundColor: kNavySurface,
                   ),
                 );
               },
               icon: const Icon(Icons.save_outlined),
-              label: const Text('حفظ الإعدادات'),
+              label: const Text('حفظ الإعدادات',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -810,7 +983,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         child: AlertDialog(
           title: const Row(
             children: [
-              Icon(Icons.verified_user, color: Color(0xFF0F5132)),
+              Icon(Icons.verified_user, color: kOrangeGold),
               SizedBox(width: 8),
               Text('تفعيل النسخة الكاملة (Pro)'),
             ],
@@ -823,26 +996,28 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 _isProActivated
                     ? 'نسختك مفعّلة بالكامل مدى الحياة ✅'
                     : 'النسخة التجريبية تتيح 30 فاتورة مجانية (${_invoices.length}/30 مستخدمة).',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.amber.shade700),
+                  color: kNavyDeep,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kCyanGlow),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('رقم جهازك:'),
+                    const Text('رقم جهازك:',
+                        style: TextStyle(color: Colors.white70)),
                     SelectableText(
                       _deviceCode,
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF0F5132)),
+                          color: kOrangeGold),
                     ),
                   ],
                 ),
@@ -853,7 +1028,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   controller: ctrl,
                   decoration: const InputDecoration(
                     labelText: 'أدخل كود التفعيل (مثال: PRO-XXXXX)',
-                    border: OutlineInputBorder(),
                   ),
                 ),
               ],
@@ -862,13 +1036,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('إغلاق'),
+              child: const Text('إغلاق', style: TextStyle(color: Colors.white70)),
             ),
             if (!_isProActivated)
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F5132),
-                  foregroundColor: Colors.white,
+                  backgroundColor: kCyanGlow,
+                  foregroundColor: kNavyDeep,
                 ),
                 onPressed: () {
                   final expected = _expectedKeyFor(_deviceCode);
@@ -887,12 +1061,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('كود التفعيل غير صحيح، تأكد من الرقم'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: Colors.redAccent,
                       ),
                     );
                   }
                 },
-                child: const Text('تفعيل الآن'),
+                child: const Text('تفعيل الآن',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
           ],
         ),
@@ -900,6 +1075,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Main Scaffold with Luxury AppBar, Royal Gradient Background & Glass Dock
+  // -------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -911,69 +1089,239 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          children: [
-            const Text(
-              'دفتر الجملة الذكي — DaftarDZ v2.0',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      extendBodyBehindAppBar: false,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(68),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF071326),
+                Color(0xFF0E2240),
+                Color(0xFF16335E),
+              ],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
             ),
-            Text(
-              _companyName,
-              style: const TextStyle(fontSize: 11, color: Color(0xFFD4AF37)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            border: Border(
+              bottom: BorderSide(
+                color: kCyanGlow.withValues(alpha: 0.55),
+                width: 1.5,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: kCyanGlow.withValues(alpha: 0.18),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                children: [
+                  _buildBrandLogo(size: 44),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            RichText(
+                              text: const TextSpan(
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.2,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'دفتر ',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  TextSpan(
+                                    text: 'الجملة ',
+                                    style: TextStyle(color: kCyanGlow),
+                                  ),
+                                  TextSpan(
+                                    text: 'Daftar',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  TextSpan(
+                                    text: 'DZ',
+                                    style: TextStyle(color: kCyanGlow),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [kOrangeGold, Color(0xFFFF6D00)],
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'v2.0',
+                                style: TextStyle(
+                                  color: kNavyDeep,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _companyName,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: kOrangeGold,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  _appBarActionButton(
+                    icon: Icons.settings_outlined,
+                    color: kCyanGlow,
+                    tooltip: 'إعدادات المؤسسة والترويسة',
+                    onTap: _showStoreSettingsDialog,
+                  ),
+                  const SizedBox(width: 6),
+                  _appBarActionButton(
+                    icon: _isProActivated
+                        ? Icons.verified_rounded
+                        : Icons.vpn_key_rounded,
+                    color: kOrangeGold,
+                    tooltip: 'تفعيل النسخة الكاملة',
+                    onTap: _showLicenseDialog,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              kNavyDeep,
+              kNavyMid,
+              Color(0xFF0D254C),
+              kNavyDeep,
+            ],
+          ),
+        ),
+        child: pages[_currentIndex],
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF0A192F),
+              Color(0xFF112240),
+              Color(0xFF0D213F),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          border: Border(
+            top: BorderSide(
+              color: kCyanGlow.withValues(alpha: 0.45),
+              width: 1.4,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: kCyanGlow.withValues(alpha: 0.16),
+              blurRadius: 18,
+              offset: const Offset(0, -4),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: 'إعدادات المؤسسة والترويسة',
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
-            onPressed: _showStoreSettingsDialog,
-          ),
-          IconButton(
-            tooltip: 'تفعيل النسخة الكاملة',
-            icon: Icon(
-              _isProActivated ? Icons.verified : Icons.vpn_key_rounded,
-              color: const Color(0xFFD4AF37),
-            ),
-            onPressed: _showLicenseDialog,
-          ),
-        ],
-      ),
-      body: pages[_currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        destinations: const [
-          NavigationDestination(
+        child: NavigationBar(
+          height: 68,
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (i) => setState(() => _currentIndex = i),
+          destinations: const [
+            NavigationDestination(
               icon: Icon(Icons.analytics_outlined),
-              selectedIcon: Icon(Icons.analytics),
-              label: 'الأرباح والمصاريف'),
-          NavigationDestination(
+              selectedIcon: Icon(Icons.analytics_rounded),
+              label: 'الأرباح',
+            ),
+            NavigationDestination(
               icon: Icon(Icons.point_of_sale_outlined),
-              selectedIcon: Icon(Icons.point_of_sale),
-              label: 'بون / Devis'),
-          NavigationDestination(
+              selectedIcon: Icon(Icons.point_of_sale_rounded),
+              label: 'بون / Devis',
+            ),
+            NavigationDestination(
               icon: Icon(Icons.inventory_2_outlined),
-              selectedIcon: Icon(Icons.inventory_2),
-              label: 'المخزون'),
-          NavigationDestination(
+              selectedIcon: Icon(Icons.inventory_2_rounded),
+              label: 'المخزون',
+            ),
+            NavigationDestination(
               icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book),
-              label: 'الكتالوج'),
-          NavigationDestination(
+              selectedIcon: Icon(Icons.menu_book_rounded),
+              label: 'الكتالوج',
+            ),
+            NavigationDestination(
               icon: Icon(Icons.people_alt_outlined),
-              selectedIcon: Icon(Icons.people_alt),
-              label: 'الزبائن والكريدي'),
-        ],
+              selectedIcon: Icon(Icons.people_alt_rounded),
+              label: 'الزبائن',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _appBarActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.55), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.2),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
       ),
     );
   }
 
   // -------------------------------------------------------------------------
-  // TAB 1: Dashboard, Net Pocket Profit & Shop Expenses (Feature 7)
+  // TAB 1: Dashboard, Vibrant KPI Cards & Shop Expenses
   // -------------------------------------------------------------------------
   Widget _buildDashboardTab() {
     final totalSales =
@@ -989,20 +1337,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         _products.where((p) => p.stock <= p.minAlert).toList();
 
     return ListView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       children: [
-        // Welcome & Store Identity Banner
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0F5132), Color(0xFF198754)],
-            ),
-            borderRadius: BorderRadius.circular(14),
-          ),
+        // Hero Glassmorphic Welcome Card
+        _glassContainer(
+          borderColor: kCyanGlow,
+          borderOpacity: 0.65,
+          gradientColors: [
+            const Color(0xFF15315B).withValues(alpha: 0.92),
+            const Color(0xFF0A192F).withValues(alpha: 0.92),
+          ],
           child: Row(
             children: [
-              const Icon(Icons.storefront, color: Color(0xFFD4AF37), size: 36),
+              _buildBrandLogo(size: 56),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -1011,64 +1358,92 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     Text(
                       _companyName,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      '$_companyWilaya | هـ: $_companyPhone',
+                      '📍 $_companyWilaya  |  📞 $_companyPhone',
                       style: const TextStyle(
-                          color: Color(0xFFD4AF37), fontSize: 12),
+                        color: kCyanGlow,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       _isProActivated
-                          ? 'النسخة الاحترافية v2.0 مفعّلة بالكامل'
+                          ? '✨ النسخة الاحترافية مفعّلة مدى الحياة'
                           : 'النسخة التجريبية (${_invoices.length}/30 فاتورة)',
-                      style:
-                          const TextStyle(color: Colors.white70, fontSize: 11),
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 11),
                     ),
                   ],
                 ),
               ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFD4AF37),
-                  foregroundColor: Colors.black87,
+              const SizedBox(width: 8),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [kOrangeGold, Color(0xFFFF6D00)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kOrangeGold.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                onPressed: () => setState(() => _currentIndex = 1),
-                child: const Text('بيع جديد +',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: kNavyDeep,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  onPressed: () => setState(() => _currentIndex = 1),
+                  icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
+                  label: const Text(
+                    'بون جديد',
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        // Feature 7 Highlight Banner: Net Pocket Profit After Expenses
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: netPocketProfit >= 0
-                ? Colors.green.shade50
-                : Colors.red.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: netPocketProfit >= 0
-                  ? Colors.green.shade700
-                  : Colors.red.shade700,
-              width: 1.4,
-            ),
-          ),
+        // Feature 7: Luminous Net Pocket Profit Banner
+        _glassContainer(
+          borderColor:
+              netPocketProfit >= 0 ? kEmeraldBright : Colors.redAccent,
+          borderOpacity: 0.7,
+          gradientColors: netPocketProfit >= 0
+              ? [
+                  const Color(0xFF064E3B).withValues(alpha: 0.85),
+                  const Color(0xFF0A192F).withValues(alpha: 0.90),
+                ]
+              : [
+                  const Color(0xFF7F1D1D).withValues(alpha: 0.85),
+                  const Color(0xFF0A192F).withValues(alpha: 0.90),
+                ],
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundColor: netPocketProfit >= 0
-                    ? const Color(0xFF0F5132)
-                    : Colors.red.shade700,
-                child: const Icon(Icons.savings_outlined,
-                    color: Color(0xFFD4AF37)),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: kOrangeGold, width: 1.5),
+                ),
+                child: const Icon(Icons.savings_rounded,
+                    color: kOrangeGold, size: 28),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1080,13 +1455,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Colors.white,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      'ربح المبيعات (${grossSalesProfit.toStringAsFixed(0)}) - المصاريف (${totalExpenses.toStringAsFixed(0)})',
-                      style:
-                          const TextStyle(fontSize: 11, color: Colors.black54),
+                      'ربح المبيعات (${grossSalesProfit.toStringAsFixed(0)}) − المصاريف (${totalExpenses.toStringAsFixed(0)})',
+                      style: const TextStyle(
+                          fontSize: 11, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -1094,19 +1470,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               Text(
                 '${netPocketProfit.toStringAsFixed(0)} د.ج',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
                   color: netPocketProfit >= 0
-                      ? const Color(0xFF0F5132)
-                      : Colors.red.shade800,
+                      ? kEmeraldBright
+                      : Colors.redAccent.shade100,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        // KPI Grid
+        // Vibrant Gradient KPI Grid (2x2)
         Row(
           children: [
             Expanded(
@@ -1114,21 +1490,23 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 title: 'إجمالي المبيعات',
                 value: '${totalSales.toStringAsFixed(0)} د.ج',
                 icon: Icons.payments_rounded,
-                color: Colors.blue.shade700,
+                gradientColors: const [Color(0xFF0288D1), Color(0xFF00ACC1)],
+                borderColor: kCyanGlow,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Expanded(
               child: _kpiCard(
-                title: 'إجمالي مصاريف المحل',
-                value: '${totalExpenses.toStringAsFixed(0)} د.ج',
-                icon: Icons.money_off_csred_rounded,
-                color: Colors.deepOrange.shade700,
+                title: 'إجمالي ربح الفواتير',
+                value: '+${grossSalesProfit.toStringAsFixed(0)} د.ج',
+                icon: Icons.trending_up_rounded,
+                gradientColors: const [Color(0xFF00897B), Color(0xFF00C853)],
+                borderColor: kEmeraldBright,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
@@ -1136,81 +1514,98 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 title: 'إجمالي الكريدي (الديون)',
                 value: '${totalDebts.toStringAsFixed(0)} د.ج',
                 icon: Icons.account_balance_wallet_rounded,
-                color: Colors.red.shade700,
+                gradientColors: const [Color(0xFFD32F2F), Color(0xFFFF5252)],
+                borderColor: const Color(0xFFFF8A80),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Expanded(
               child: _kpiCard(
-                title: 'سلع قاربت على النفاد',
-                value: '${lowStockItems.length} سلع',
-                icon: Icons.warning_amber_rounded,
-                color: Colors.orange.shade800,
+                title: 'مصاريف المحل (${_expenses.length})',
+                value: '${totalExpenses.toStringAsFixed(0)} د.ج',
+                icon: Icons.local_shipping_rounded,
+                gradientColors: const [Color(0xFFE65100), Color(0xFFFF9100)],
+                borderColor: kOrangeGold,
               ),
             ),
           ],
         ),
 
-        // Feature 7: Shop Expenses Section (نقل، كراء، تغليف...)
-        const SizedBox(height: 16),
+        // Shop Expenses Ledger Section
+        const SizedBox(height: 18),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              '💸 سجل مصاريف المحل (نقل، كراء، تغليف...):',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            const Row(
+              children: [
+                Icon(Icons.receipt_long_rounded, color: kOrangeGold, size: 20),
+                SizedBox(width: 6),
+                Text(
+                  'سجل مصاريف المحل (نقل، كراء، تغليف...):',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Colors.white),
+                ),
+              ],
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange.shade700,
-                foregroundColor: Colors.white,
+                backgroundColor: kOrangeGold,
+                foregroundColor: kNavyDeep,
                 visualDensity: VisualDensity.compact,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               onPressed: _showAddExpenseDialog,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('تسجيل مصروف', style: TextStyle(fontSize: 12)),
+              icon: const Icon(Icons.add_circle_outline, size: 17),
+              label: const Text('تسجيل مصروف',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         if (_expenses.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(14),
-              child: Center(
-                child: Text(
-                  'لا توجد مصاريف مسجلة. سجل مصاريف النقل أو الكراء أو التغليف لحساب ربحك الصافي بدقة.',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                  textAlign: TextAlign.center,
-                ),
+          _glassContainer(
+            borderColor: kOrangeGold,
+            borderOpacity: 0.3,
+            child: const Center(
+              child: Text(
+                'لا توجد مصاريف مسجلة بعد. اضغط «تسجيل مصروف» لإضافة مصاريف النقل أو الكراء أو التغليف.',
+                style: TextStyle(fontSize: 12, color: Colors.white70),
+                textAlign: TextAlign.center,
               ),
             ),
           )
         else
           ..._expenses.reversed.take(5).map((exp) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   dense: true,
                   leading: CircleAvatar(
-                    backgroundColor: Colors.orange.shade100,
-                    child: Icon(Icons.receipt_long,
-                        color: Colors.deepOrange.shade800, size: 20),
+                    backgroundColor: kOrangeGold.withValues(alpha: 0.2),
+                    child: const Icon(Icons.money_off_csred_rounded,
+                        color: kOrangeGold, size: 20),
                   ),
                   title: Text('${exp.title} (${exp.category})',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('التاريخ: ${exp.dateStr}'),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  subtitle: Text('التاريخ: ${exp.dateStr}',
+                      style: const TextStyle(color: Colors.white60)),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         '-${exp.amount.toStringAsFixed(0)} د.ج',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.red.shade700,
+                          color: kOrangeGold,
                         ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete_outline,
-                            size: 18, color: Colors.grey),
+                            size: 18, color: Colors.white54),
                         tooltip: 'حذف المصروف',
                         onPressed: () {
                           setState(() => _expenses.remove(exp));
@@ -1222,70 +1617,200 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 ),
               )),
 
+        // Low Stock Alert Section
         if (lowStockItems.isNotEmpty) ...[
           const SizedBox(height: 16),
-          const Text('⚠️ تنبيهات المخزون المنخفض:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded,
+                  color: kOrangeGold, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                'تنبيهات المخزون المنخفض (${lowStockItems.length} سلع):',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: kOrangeGold),
+              ),
+            ],
+          ),
           const SizedBox(height: 6),
-          ...lowStockItems.map((p) => Card(
-                color: Colors.orange.shade50,
-                child: ListTile(
-                  dense: true,
-                  leading: const Icon(Icons.warning_rounded,
-                      color: Colors.deepOrange),
-                  title: Text(p.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('المتبقي في المخزن: ${p.stock} فقط'),
-                  trailing: TextButton(
-                    onPressed: () => setState(() => _currentIndex = 2),
-                    child: const Text('تزويد المخزون'),
-                  ),
+          ...lowStockItems.map((p) => _glassContainer(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                borderColor: kOrangeGold,
+                borderOpacity: 0.6,
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_rounded,
+                        color: kOrangeGold, size: 26),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.name,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          Text('المتبقي في المخزن: ${p.stock} فقط',
+                              style: const TextStyle(
+                                  color: kOrangeGold, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: kCyanGlow,
+                      ),
+                      onPressed: () => setState(() => _currentIndex = 2),
+                      child: const Text('تزويد +',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
               )),
         ],
 
+        // Recent Invoices Section
         const SizedBox(height: 16),
-        const Text('🧾 آخر الفواتير والبونات المسجلة:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        const SizedBox(height: 6),
+        const Row(
+          children: [
+            Icon(Icons.receipt_rounded, color: kCyanGlow, size: 20),
+            SizedBox(width: 6),
+            Text(
+              'آخر الفواتير والبونات المسجلة:',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.white),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
         if (_invoices.isEmpty)
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(
+          _glassContainer(
+            child: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(12),
                 child: Text(
-                    'لا توجد فواتير بعد. ابدأ بإنشاء أول بون من تبويب «بون / Devis».'),
+                  'لا توجد فواتير بعد. ابدأ بإنشاء أول بون من تبويب «بون / Devis».',
+                  style: TextStyle(color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           )
         else
           ..._invoices.reversed.take(10).map((inv) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: inv.remainingDebt > 0
-                        ? Colors.red.shade100
-                        : Colors.green.shade100,
+                        ? Colors.redAccent.withValues(alpha: 0.22)
+                        : kEmeraldBright.withValues(alpha: 0.22),
                     child: Icon(
-                      inv.remainingDebt > 0 ? Icons.schedule : Icons.check,
-                      color: inv.remainingDebt > 0 ? Colors.red : Colors.green,
+                      inv.remainingDebt > 0
+                          ? Icons.schedule_rounded
+                          : Icons.check_circle_rounded,
+                      color: inv.remainingDebt > 0
+                          ? Colors.redAccent
+                          : kEmeraldBright,
                     ),
                   ),
                   title: Text(
-                      '${inv.customerName} (${inv.isWholesale ? "جملة" : "تجزئة"})',
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                    '${inv.customerName} (${inv.isWholesale ? "جملة" : "تجزئة"})',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                   subtitle: Text(
-                      'التاريخ: ${inv.dateStr}${inv.discountAmount > 0 ? " | خصم: ${inv.discountAmount.toStringAsFixed(0)} د.ج" : ""}\nالربح الصافي: ${inv.netProfit.toStringAsFixed(0)} د.ج | الباقي كريدي: ${inv.remainingDebt.toStringAsFixed(0)} د.ج'),
+                    'التاريخ: ${inv.dateStr}${inv.discountAmount > 0 ? " | خصم: ${inv.discountAmount.toStringAsFixed(0)} د.ج" : ""}\nالربح الصافي: +${inv.netProfit.toStringAsFixed(0)} د.ج | الباقي كريدي: ${inv.remainingDebt.toStringAsFixed(0)} د.ج',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
                   isThreeLine: true,
                   trailing: Text(
                     '${inv.totalAmount.toStringAsFixed(0)} د.ج',
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w900,
                         fontSize: 15,
-                        color: Color(0xFF0F5132)),
+                        color: kCyanGlow),
                   ),
                 ),
               )),
       ],
+    );
+  }
+
+  Widget _kpiCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required List<Color> gradientColors,
+    required Color borderColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: borderColor.withValues(alpha: 0.85),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors.last.withValues(alpha: 0.35),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.white, size: 28),
+              ),
+              Icon(Icons.auto_graph_rounded,
+                  color: Colors.white.withValues(alpha: 0.35), size: 22),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1300,16 +1825,22 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         builder: (ctx, setDialogState) => Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: const Text('تسجيل مصروف جديد للمحل'),
+            title: const Row(
+              children: [
+                Icon(Icons.local_shipping_rounded, color: kOrangeGold),
+                SizedBox(width: 8),
+                Text('تسجيل مصروف جديد للمحل'),
+              ],
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: selectedCat,
+                    dropdownColor: kNavyMid,
                     decoration: const InputDecoration(
                       labelText: 'نوع المصروف',
-                      border: OutlineInputBorder(),
                     ),
                     items: kExpenseCategories
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
@@ -1323,7 +1854,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     controller: titleCtrl,
                     decoration: const InputDecoration(
                       labelText: 'بيان المصروف (مثال: توصيل بضاعة، أكياس...)',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -1332,7 +1862,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'المبلغ (د.ج)',
-                      border: OutlineInputBorder(),
                     ),
                   ),
                 ],
@@ -1341,12 +1870,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('إلغاء'),
+                child: const Text('إلغاء',
+                    style: TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange.shade700,
-                  foregroundColor: Colors.white,
+                  backgroundColor: kOrangeGold,
+                  foregroundColor: kNavyDeep,
                 ),
                 onPressed: () {
                   final amt = double.tryParse(amountCtrl.text.trim()) ?? 0;
@@ -1366,7 +1896,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   _saveData();
                   Navigator.pop(ctx);
                 },
-                child: const Text('حفظ المصروف'),
+                child: const Text('حفظ المصروف',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -1375,48 +1906,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  Widget _kpiCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 26),
-          const SizedBox(height: 6),
-          Text(title,
-              style: const TextStyle(fontSize: 12, color: Colors.black54)),
-          const SizedBox(height: 2),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // -------------------------------------------------------------------------
-  // TAB 2: Fast POS + Discount (Remise) + Quote (Devis) (Feature 4)
+  // TAB 2: Fast POS + Discount (Remise) + Quote (Devis)
   // -------------------------------------------------------------------------
   Widget _buildPosTab() {
     double cartSubtotal = 0;
@@ -1439,23 +1930,27 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
     return Column(
       children: [
-        // Top Controls: Customer + Wholesale/Retail Toggle
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          color: Colors.white,
+        // Top Controls Glass Panel
+        _glassContainer(
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          borderRadius: 16,
           child: Column(
             children: [
               Row(
                 children: [
+                  const Icon(Icons.person_outline, color: kCyanGlow, size: 20),
+                  const SizedBox(width: 6),
                   const Text('الزبون: ',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: DropdownButtonFormField<CustomerItem>(
                       initialValue: _selectedCustomer,
+                      dropdownColor: kNavyMid,
                       isDense: true,
                       decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
@@ -1463,7 +1958,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           .map((c) => DropdownMenuItem(
                                 value: c,
                                 child: Text(
-                                    '${c.name} (دين: ${c.totalDebt.toStringAsFixed(0)} د.ج)'),
+                                  '${c.name} (دين: ${c.totalDebt.toStringAsFixed(0)} د.ج)',
+                                  style: const TextStyle(fontSize: 13),
+                                ),
                               ))
                           .toList(),
                       onChanged: (val) =>
@@ -1475,20 +1972,23 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
+                  const Icon(Icons.sell_outlined, color: kOrangeGold, size: 20),
+                  const SizedBox(width: 6),
                   const Text('التسعير: ',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: SegmentedButton<bool>(
                       segments: const [
                         ButtonSegment(
                             value: true,
                             label: Text('سعر الجملة (Gros)'),
-                            icon: Icon(Icons.warehouse)),
+                            icon: Icon(Icons.warehouse_outlined)),
                         ButtonSegment(
                             value: false,
                             label: Text('سعر التجزئة (Détail)'),
-                            icon: Icon(Icons.store)),
+                            icon: Icon(Icons.storefront_outlined)),
                       ],
                       selected: {_posWholesaleMode},
                       onSelectionChanged: (s) =>
@@ -1500,12 +2000,11 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             ],
           ),
         ),
-        const Divider(height: 1),
 
-        // Product Selection List with Thumbnail & Zoom
+        // Product Selection List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             itemCount: _products.length,
             itemBuilder: (ctx, i) {
               final p = _products[i];
@@ -1513,28 +2012,56 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               final price =
                   _posWholesaleMode ? p.wholesalePrice : p.retailPrice;
               return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: qty > 0
+                        ? kOrangeGold
+                        : kCyanGlow.withValues(alpha: 0.25),
+                    width: qty > 0 ? 1.6 : 1.0,
+                  ),
+                ),
                 child: ListTile(
                   leading: _buildProductThumbnail(p, size: 48),
                   title: Text(p.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
                   subtitle: Text(
-                      '${p.category} | السعر: ${price.toStringAsFixed(0)} د.ج | المتوفر: ${p.stock}'),
+                    '${p.category} | السعر: ${price.toStringAsFixed(0)} د.ج | المتوفر: ${p.stock}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline,
-                            color: Colors.red),
+                            color: Colors.redAccent),
                         onPressed: qty > 0
                             ? () => setState(() => _cartQty[p.id] = qty - 1)
                             : null,
                       ),
-                      Text('$qty',
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: qty > 0
+                              ? kOrangeGold.withValues(alpha: 0.2)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$qty',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: qty > 0 ? kOrangeGold : Colors.white,
+                          ),
+                        ),
+                      ),
                       IconButton(
-                        icon: const Icon(Icons.add_circle,
-                            color: Color(0xFF0F5132)),
+                        icon: const Icon(Icons.add_circle_rounded,
+                            color: kCyanGlow),
                         onPressed: qty < p.stock
                             ? () => setState(() => _cartQty[p.id] = qty + 1)
                             : null,
@@ -1547,18 +2074,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           ),
         ),
 
-        // Bottom Checkout Summary with Remise & Devis Button
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 6,
-                  offset: const Offset(0, -2)),
-            ],
-          ),
+        // Bottom Checkout Glass Panel with Remise & Devis
+        _glassContainer(
+          margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+          padding: const EdgeInsets.all(12),
+          borderColor: kOrangeGold,
+          borderOpacity: 0.55,
           child: Column(
             children: [
               Row(
@@ -1569,18 +2090,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         ? 'الصافي بعد الخصم: ${netTotal.toStringAsFixed(0)} د.ج'
                         : 'المجموع الكلي: ${netTotal.toStringAsFixed(0)} د.ج',
                     style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F5132)),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: kCyanGlow,
+                    ),
                   ),
                   Text(
                     'ربح البون: +${netProfit.toStringAsFixed(0)} د.ج',
                     style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: netProfit >= 0
-                            ? Colors.green.shade700
-                            : Colors.red.shade700),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          netProfit >= 0 ? kEmeraldBright : Colors.redAccent,
+                    ),
                   ),
                 ],
               ),
@@ -1596,7 +2118,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         labelText: 'الخصم Remise (د.ج)',
                         prefixIcon: Icon(Icons.discount_outlined, size: 18),
                         isDense: true,
-                        border: OutlineInputBorder(),
                       ),
                     ),
                   ),
@@ -1608,9 +2129,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       decoration: InputDecoration(
                         labelText:
                             'المدفوع (فارغ = ${netTotal.toStringAsFixed(0)})',
-                        prefixIcon: const Icon(Icons.payments_outlined, size: 18),
+                        prefixIcon:
+                            const Icon(Icons.payments_outlined, size: 18),
                         isDense: true,
-                        border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
@@ -1622,13 +2143,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF0F5132),
-                        side: const BorderSide(color: Color(0xFF0F5132)),
+                        foregroundColor: kCyanGlow,
+                        side: const BorderSide(color: kCyanGlow, width: 1.4),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       onPressed: cartSubtotal <= 0
                           ? null
-                          : () => _sendQuoteDevis(cartSubtotal, remise, netTotal),
+                          : () =>
+                              _sendQuoteDevis(cartSubtotal, remise, netTotal),
                       icon: const Icon(Icons.request_quote_outlined, size: 18),
                       label: const Text(
                         'إرسال عرض سعر (Devis)',
@@ -1641,19 +2163,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F5132),
-                        foregroundColor: Colors.white,
+                        backgroundColor: kOrangeGold,
+                        foregroundColor: kNavyDeep,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       onPressed: cartSubtotal <= 0
                           ? null
                           : () => _completeInvoice(
                               cartSubtotal, remise, netTotal, netProfit),
-                      icon: const Icon(Icons.check_circle_outline, size: 18),
+                      icon: const Icon(Icons.check_circle_rounded, size: 18),
                       label: const Text(
                         'حفظ وإرسال البون',
                         style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
+                            fontSize: 12, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -1666,7 +2188,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  // Feature 4: Send Devis (Quote) via WhatsApp without deducting stock
   void _sendQuoteDevis(double subtotal, double remise, double netTotal) {
     final cust = _selectedCustomer ?? _customers.first;
     final lines = <String>[];
@@ -1720,7 +2241,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     final dateStr = _nowDateStr();
     cust.totalDebt += remaining;
 
-    // Record in Customer Detailed Ledger (Feature 2)
     cust.ledger.add(CustomerLedgerEntry(
       id: 'led_${DateTime.now().millisecondsSinceEpoch}',
       dateStr: dateStr,
@@ -1766,7 +2286,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          title: const Text('تم حفظ البون بنجاح ✅'),
+          title: const Text('تم حفظ البون بنجاح ✅',
+              style: TextStyle(color: kCyanGlow)),
           content: Text(
             'الزبون: ${cust.name}\n'
             'المجموع قبل الخصم: ${subtotal.toStringAsFixed(0)} د.ج\n'
@@ -1779,12 +2300,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('لاحقاً'),
+              child: const Text('لاحقاً',
+                  style: TextStyle(color: Colors.white70)),
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
-                foregroundColor: Colors.white,
+                backgroundColor: kEmeraldBright,
+                foregroundColor: kNavyDeep,
               ),
               onPressed: () {
                 Navigator.pop(ctx);
@@ -1803,7 +2325,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 _sendWhatsApp(cust.phone, msg);
               },
               icon: const Icon(Icons.send),
-              label: const Text('إرسال عبر واتساب'),
+              label: const Text('إرسال عبر واتساب',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1812,10 +2335,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   // -------------------------------------------------------------------------
-  // TAB 3: Inventory + Stock Financial Valuation (Feature 3) + Auto Margin (Feature 6)
+  // TAB 3: Inventory + Stock Financial Valuation + Auto Margin Calculator
   // -------------------------------------------------------------------------
   Widget _buildInventoryTab() {
-    // Feature 3: Financial Stock Valuation Calculation
     double totalCapitalBuy = 0;
     double totalValueWholesale = 0;
     double totalValueRetail = 0;
@@ -1831,26 +2353,22 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     final latentRetailProfit = totalValueRetail - totalCapitalBuy;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // Feature 3: Stock Financial Valuation Banner at Top of Inventory
-          Container(
+          // Glassmorphic Stock Financial Valuation Banner
+          _glassContainer(
             margin: const EdgeInsets.fromLTRB(10, 10, 10, 4),
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0F5132), Color(0xFF146C43)],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
-            ),
+            borderColor: kCyanGlow,
+            borderOpacity: 0.6,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Row(
                   children: [
                     Icon(Icons.assessment_outlined,
-                        color: Color(0xFFD4AF37), size: 18),
+                        color: kOrangeGold, size: 20),
                     SizedBox(width: 6),
                     Text(
                       'التقييم المالي للمخزون الحالي (Stock Valuation)',
@@ -1877,17 +2395,18 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       child: _stockValuationPill(
                         label: 'القيمة (بسعر الجملة)',
                         value: '${totalValueWholesale.toStringAsFixed(0)} د.ج',
-                        valueColor: const Color(0xFFD4AF37),
+                        valueColor: kCyanGlow,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: _stockValuationPill(
                         label: 'الربح الكامن (جملة)',
-                        value: '+${latentWholesaleProfit.toStringAsFixed(0)} د.ج',
+                        value:
+                            '+${latentWholesaleProfit.toStringAsFixed(0)} د.ج',
                         subLabel:
                             'تجزئة: +${latentRetailProfit.toStringAsFixed(0)}',
-                        valueColor: Colors.greenAccent.shade200,
+                        valueColor: kOrangeGold,
                       ),
                     ),
                   ],
@@ -1896,7 +2415,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             ),
           ),
 
-          // Inventory List
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(10),
@@ -1905,29 +2423,32 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 final p = _products[i];
                 final isLow = p.stock <= p.minAlert;
                 return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: _buildProductThumbnail(p, size: 52),
                     title: Row(
                       children: [
                         Expanded(
                           child: Text(p.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF0F5132).withValues(alpha: 0.1),
+                            color: kCyanGlow.withValues(alpha: 0.16),
                             borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: kCyanGlow.withValues(alpha: 0.45)),
                           ),
                           child: Text(
                             p.category,
                             style: const TextStyle(
                               fontSize: 11,
-                              color: Color(0xFF0F5132),
-                              fontWeight: FontWeight.w600,
+                              color: kCyanGlow,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -1938,7 +2459,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       child: Text(
                         'المتوفر: ${p.stock} | شراء: ${p.buyPrice.toStringAsFixed(0)} | جملة: ${p.wholesalePrice.toStringAsFixed(0)} | تجزئة: ${p.retailPrice.toStringAsFixed(0)} د.ج',
                         style: TextStyle(
-                          color: isLow ? Colors.red.shade700 : Colors.black87,
+                          color: isLow ? kOrangeGold : Colors.white70,
                           fontWeight:
                               isLow ? FontWeight.bold : FontWeight.normal,
                         ),
@@ -1949,13 +2470,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit_outlined,
-                              color: Colors.blueGrey),
+                              color: kCyanGlow),
                           tooltip: 'تعديل السلعة أو صورتها',
                           onPressed: () => _showProductDialog(existing: p),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add_box_outlined,
-                              color: Color(0xFF0F5132)),
+                          icon: const Icon(Icons.add_box_rounded,
+                              color: kOrangeGold),
                           tooltip: 'إضافة كمية للمخزون (+10)',
                           onPressed: () {
                             setState(() => p.stock += 10);
@@ -1972,11 +2493,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF0F5132),
-        foregroundColor: Colors.white,
+        backgroundColor: kOrangeGold,
+        foregroundColor: kNavyDeep,
         onPressed: () => _showProductDialog(),
-        icon: const Icon(Icons.add_a_photo_outlined),
-        label: const Text('سلعة جديدة'),
+        icon: const Icon(Icons.add_a_photo_rounded),
+        label: const Text('سلعة جديدة',
+            style: TextStyle(fontWeight: FontWeight.w900)),
       ),
     );
   }
@@ -1990,8 +2512,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
+        color: kNavyDeep.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: valueColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2007,7 +2530,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               value,
               style: TextStyle(
                 color: valueColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w900,
                 fontSize: 13,
               ),
             ),
@@ -2022,7 +2545,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  // Feature 6: Auto Profit Margin Calculator (+15% Wholesale, +30% Retail)
   void _showProductDialog({ProductItem? existing}) {
     final nameCtrl = TextEditingController(text: existing?.name ?? '');
     final buyCtrl = TextEditingController(
@@ -2064,20 +2586,23 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
-              title: Text(existing == null
-                  ? 'إضافة سلعة جديدة للمخزون'
-                  : 'تعديل بيانات وصورة السلعة'),
+              title: Text(
+                existing == null
+                    ? 'إضافة سلعة جديدة للمخزون'
+                    : 'تعديل بيانات وصورة السلعة',
+                style: const TextStyle(color: kCyanGlow, fontSize: 16),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Image Preview & Camera/Gallery Buttons
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
+                        color: kNavyDeep.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                            color: kCyanGlow.withValues(alpha: 0.4)),
                       ),
                       child: Column(
                         children: [
@@ -2097,7 +2622,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                 IconButton(
                                   icon: const CircleAvatar(
                                     radius: 14,
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: Colors.redAccent,
                                     child: Icon(Icons.delete_outline,
                                         size: 16, color: Colors.white),
                                   ),
@@ -2112,12 +2637,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               child: Column(
                                 children: [
                                   Icon(Icons.camera_alt_outlined,
-                                      size: 36, color: Color(0xFF0F5132)),
+                                      size: 36, color: kOrangeGold),
                                   SizedBox(height: 4),
                                   Text(
                                     'التقط صورة السلعة أو اخترها من المعرض',
                                     style: TextStyle(
-                                        fontSize: 12, color: Colors.black54),
+                                        fontSize: 12, color: Colors.white70),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -2128,6 +2653,10 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: kCyanGlow,
+                                    side: const BorderSide(color: kCyanGlow),
+                                  ),
                                   onPressed: () async {
                                     final path = await _pickAndSaveProductImage(
                                         ImageSource.camera);
@@ -2145,6 +2674,10 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: kOrangeGold,
+                                    side: const BorderSide(color: kOrangeGold),
+                                  ),
                                   onPressed: () async {
                                     final path = await _pickAndSaveProductImage(
                                         ImageSource.gallery);
@@ -2173,6 +2706,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       initialValue: selectedCategory,
+                      dropdownColor: kNavyMid,
                       decoration: const InputDecoration(
                         labelText: 'التصنيف (Category)',
                       ),
@@ -2189,7 +2723,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       },
                     ),
                     const SizedBox(height: 8),
-                    // Feature 6: Buy Price with Auto Profit Margin Suggestion (+15% / +30%)
                     TextField(
                       controller: buyCtrl,
                       keyboardType: TextInputType.number,
@@ -2214,14 +2747,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       spacing: 6,
                       children: [
                         ActionChip(
-                          avatar: const Icon(Icons.auto_fix_high, size: 15),
+                          backgroundColor: kNavyDeep,
+                          side: const BorderSide(color: kOrangeGold),
+                          avatar: const Icon(Icons.auto_fix_high,
+                              size: 15, color: kOrangeGold),
                           label: const Text('اقتراح +15% جملة / +30% تجزئة',
-                              style: TextStyle(fontSize: 11)),
+                              style:
+                                  TextStyle(fontSize: 11, color: Colors.white)),
                           onPressed: () =>
                               applyMarginSuggestion(15, 30, setDialogState),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: grosCtrl,
                       keyboardType: TextInputType.number,
@@ -2236,6 +2774,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                             : null,
                       ),
                     ),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: detailCtrl,
                       keyboardType: TextInputType.number,
@@ -2250,6 +2789,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                             : null,
                       ),
                     ),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: stockCtrl,
                       keyboardType: TextInputType.number,
@@ -2262,12 +2802,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('إلغاء'),
+                  child: const Text('إلغاء',
+                      style: TextStyle(color: Colors.white70)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F5132),
-                    foregroundColor: Colors.white,
+                    backgroundColor: kOrangeGold,
+                    foregroundColor: kNavyDeep,
                   ),
                   onPressed: () {
                     if (nameCtrl.text.trim().isEmpty) return;
@@ -2302,7 +2843,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     _saveData();
                     Navigator.pop(ctx);
                   },
-                  child: const Text('حفظ السلعة'),
+                  child: const Text('حفظ السلعة',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -2313,7 +2855,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   // -------------------------------------------------------------------------
-  // TAB 4: Visual Catalog Generator (Feature 5)
+  // TAB 4: Visual Catalog Generator (Glassmorphic Grid + PDF + WhatsApp)
   // -------------------------------------------------------------------------
   List<ProductItem> get _filteredCatalogProducts {
     return _products.where((p) {
@@ -2332,19 +2874,10 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
     return Column(
       children: [
-        // Top Action Bar: PDF Preview/Print & WhatsApp Share
-        Container(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+        _glassContainer(
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+          padding: const EdgeInsets.all(10),
+          borderRadius: 16,
           child: Column(
             children: [
               Row(
@@ -2352,16 +2885,16 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F5132),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: kCyanGlow,
+                        foregroundColor: kNavyDeep,
+                        padding: const EdgeInsets.symmetric(vertical: 11),
                       ),
                       onPressed: _isGeneratingPdf ? null : _previewAndPrintPdf,
-                      icon: const Icon(Icons.picture_as_pdf, size: 20),
+                      icon: const Icon(Icons.picture_as_pdf_rounded, size: 19),
                       label: const Text(
                         'معاينة وطباعة الكتالوج (PDF)',
                         style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
+                            fontSize: 11.5, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
@@ -2369,63 +2902,59 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade700,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: kOrangeGold,
+                        foregroundColor: kNavyDeep,
+                        padding: const EdgeInsets.symmetric(vertical: 11),
                       ),
                       onPressed:
                           _isGeneratingPdf ? null : _shareCatalogToWhatsApp,
-                      icon: const Icon(Icons.share, size: 20),
+                      icon: const Icon(Icons.share_rounded, size: 19),
                       label: const Text(
                         'إرسال الكتالوج للزبائن عبر واتساب',
                         style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
+                            fontSize: 11.5, fontWeight: FontWeight.w900),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-
-              // Store Header Summary & Edit Button
               InkWell(
                 onTap: _showStoreSettingsDialog,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0F5132).withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.6)),
+                    color: kNavyDeep.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(10),
+                    border:
+                        Border.all(color: kOrangeGold.withValues(alpha: 0.6)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.business,
-                          size: 18, color: Color(0xFF0F5132)),
+                      const Icon(Icons.business_rounded,
+                          size: 18, color: kOrangeGold),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '$_companyName | $_companyWilaya | هـ: $_companyPhone',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F5132),
+                            color: Colors.white,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Icon(Icons.edit_note,
-                          size: 20, color: Color(0xFF0F5132)),
+                      const Icon(Icons.edit_note_rounded,
+                          size: 20, color: kCyanGlow),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-
-              // Pricing Mode + Hide Out-of-Stock Toggle
               Row(
                 children: [
                   Expanded(
@@ -2455,8 +2984,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     selected: _catalogHideOutOfStock,
                     label: const Text('إخفاء النافد',
                         style: TextStyle(fontSize: 11)),
-                    selectedColor:
-                        const Color(0xFFD4AF37).withValues(alpha: 0.35),
+                    selectedColor: kOrangeGold.withValues(alpha: 0.3),
+                    checkmarkColor: kOrangeGold,
                     onSelected: (v) {
                       setState(() => _catalogHideOutOfStock = v);
                       _saveData();
@@ -2465,8 +2994,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-
-              // Category Filter Bar
               SizedBox(
                 height: 34,
                 child: ListView.separated(
@@ -2479,11 +3006,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     return ChoiceChip(
                       label: Text(cat, style: const TextStyle(fontSize: 12)),
                       selected: selected,
-                      selectedColor: const Color(0xFF0F5132),
+                      selectedColor: kCyanGlow,
+                      backgroundColor: kNavyDeep,
                       labelStyle: TextStyle(
-                        color: selected ? Colors.white : Colors.black87,
+                        color: selected ? kNavyDeep : Colors.white70,
                         fontWeight:
-                            selected ? FontWeight.bold : FontWeight.normal,
+                            selected ? FontWeight.w900 : FontWeight.normal,
                       ),
                       onSelected: (_) =>
                           setState(() => _catalogSelectedCategory = cat),
@@ -2497,11 +3025,10 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
         if (_isGeneratingPdf)
           const LinearProgressIndicator(
-            color: Color(0xFFD4AF37),
-            backgroundColor: Color(0xFF0F5132),
+            color: kOrangeGold,
+            backgroundColor: kNavyMid,
           ),
 
-        // GridView of Product Cards
         Expanded(
           child: items.isEmpty
               ? const Center(
@@ -2509,7 +3036,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     padding: EdgeInsets.all(24),
                     child: Text(
                       'لا توجد سلع مطابقة للفلتر الحالي في الكتالوج.',
-                      style: TextStyle(fontSize: 15, color: Colors.black54),
+                      style: TextStyle(fontSize: 15, color: Colors.white60),
                     ),
                   ),
                 )
@@ -2531,14 +3058,28 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         : p.retailPrice;
                     final inStock = p.stock > 0;
 
-                    return Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.5),
-                          width: 1,
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            kNavySurface.withValues(alpha: 0.9),
+                            kNavyDeep.withValues(alpha: 0.95),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: kCyanGlow.withValues(alpha: 0.45),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: kCyanGlow.withValues(alpha: 0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: Column(
@@ -2559,21 +3100,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                     )
                                   else
                                     Container(
-                                      color: const Color(0xFF0F5132)
-                                          .withValues(alpha: 0.07),
+                                      color: kNavyDeep.withValues(alpha: 0.5),
                                       child: const Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
                                           Icon(Icons.add_a_photo_outlined,
-                                              size: 36,
-                                              color: Color(0xFF0F5132)),
+                                              size: 36, color: kCyanGlow),
                                           SizedBox(height: 4),
                                           Text(
                                             'اضغط لإضافة صورة',
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: Color(0xFF0F5132),
+                                              color: kCyanGlow,
                                             ),
                                           ),
                                         ],
@@ -2586,14 +3125,16 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF0F5132)
-                                            .withValues(alpha: 0.88),
+                                        color:
+                                            kNavyDeep.withValues(alpha: 0.88),
                                         borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                            color: kCyanGlow, width: 0.8),
                                       ),
                                       child: Text(
                                         p.category,
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: kCyanGlow,
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -2638,6 +3179,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -2646,11 +3188,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 8, vertical: 5),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0F5132),
+                                    gradient: const LinearGradient(
+                                      colors: [kNavyDeep, kNavyMid],
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                        color: const Color(0xFFD4AF37),
-                                        width: 1),
+                                        color: kOrangeGold, width: 1.1),
                                   ),
                                   child: Row(
                                     mainAxisAlignment:
@@ -2668,8 +3211,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                       Text(
                                         '${price.toStringAsFixed(0)} د.ج',
                                         style: const TextStyle(
-                                          color: Color(0xFFD4AF37),
-                                          fontWeight: FontWeight.bold,
+                                          color: kOrangeGold,
+                                          fontWeight: FontWeight.w900,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -2978,7 +3521,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('حدث خطأ أثناء معاينة الكتالوج: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.redAccent,
           ),
         );
       }
@@ -3013,7 +3556,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('تعذر مشاركة ملف الكتالوج: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.redAccent,
           ),
         );
       }
@@ -3023,26 +3566,27 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   // -------------------------------------------------------------------------
-  // TAB 5: Customers + Dual Debt Reminder (SMS + WhatsApp) (Feature 1)
-  //        + Detailed Customer Ledger Bottom Sheet & Due Date (Feature 2)
+  // TAB 5: Customers + Dual Debt Reminder (SMS + WhatsApp)
+  //        + Detailed Customer Ledger Bottom Sheet & Due Date
   // -------------------------------------------------------------------------
   Widget _buildCustomersTab() {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
+          _glassContainer(
+            margin: const EdgeInsets.fromLTRB(10, 10, 10, 4),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            color: const Color(0xFF0F5132).withValues(alpha: 0.08),
+            borderRadius: 12,
+            borderColor: kCyanGlow,
             child: const Row(
               children: [
-                Icon(Icons.touch_app_outlined,
-                    size: 18, color: Color(0xFF0F5132)),
+                Icon(Icons.touch_app_rounded, size: 18, color: kOrangeGold),
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     'اضغط على أي زبون لفتح «كراس الحساب التفصيلي» وتحديد موعد التسديد (Due Date).',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF0F5132)),
+                    style: TextStyle(fontSize: 12, color: Colors.white),
                   ),
                 ),
               ],
@@ -3056,26 +3600,28 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 final c = _customers[i];
                 final hasDebt = c.totalDebt > 0;
                 return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     onTap: () => _showCustomerLedgerSheet(c),
                     leading: CircleAvatar(
-                      backgroundColor:
-                          hasDebt ? Colors.red.shade100 : Colors.green.shade100,
+                      backgroundColor: hasDebt
+                          ? Colors.redAccent.withValues(alpha: 0.2)
+                          : kEmeraldBright.withValues(alpha: 0.2),
                       child: Icon(
-                        Icons.person,
-                        color: hasDebt ? Colors.red : Colors.green,
+                        Icons.person_rounded,
+                        color: hasDebt ? Colors.redAccent : kEmeraldBright,
                       ),
                     ),
                     title: Text(c.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'الدين المتبقي (الكريدي): ${c.totalDebt.toStringAsFixed(0)} د.ج',
                           style: TextStyle(
-                            color:
-                                hasDebt ? Colors.red.shade700 : Colors.black87,
+                            color: hasDebt ? kOrangeGold : Colors.white70,
                             fontWeight:
                                 hasDebt ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -3083,9 +3629,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         if (c.dueDate != null && c.dueDate!.isNotEmpty)
                           Text(
                             '📅 موعد التسديد المتفق عليه: ${c.dueDate}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
-                              color: Colors.orange.shade900,
+                              color: kCyanGlow,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -3098,15 +3644,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           IconButton(
                             tooltip: 'تسجيل دفعة (Versement)',
                             icon: const Icon(Icons.payments_outlined,
-                                color: Colors.green),
+                                color: kEmeraldBright),
                             onPressed: () => _showPayDebtDialog(c),
                           ),
-                        // Feature 1: Free Direct SMS Reminder Button
                         if (hasDebt && c.phone.isNotEmpty)
                           IconButton(
                             tooltip: 'تذكير مجاني عبر رسالة نصية SMS',
                             icon: const Icon(Icons.sms_outlined,
-                                color: Colors.blue),
+                                color: kCyanGlow),
                             onPressed: () {
                               final duePart = (c.dueDate != null &&
                                       c.dueDate!.isNotEmpty)
@@ -3117,12 +3662,11 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               _sendSms(c.phone, smsMsg);
                             },
                           ),
-                        // Feature 1: WhatsApp Reminder Button
                         if (c.phone.isNotEmpty)
                           IconButton(
                             tooltip: 'إرسال تذكير عبر واتساب',
                             icon: const Icon(Icons.chat_outlined,
-                                color: Color(0xFF0F5132)),
+                                color: kOrangeGold),
                             onPressed: () {
                               final duePart = (c.dueDate != null &&
                                       c.dueDate!.isNotEmpty)
@@ -3146,24 +3690,26 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF0F5132),
-        foregroundColor: Colors.white,
+        backgroundColor: kCyanGlow,
+        foregroundColor: kNavyDeep,
         onPressed: _showAddCustomerDialog,
-        icon: const Icon(Icons.person_add),
-        label: const Text('زبون جديد'),
+        icon: const Icon(Icons.person_add_alt_1_rounded),
+        label: const Text('زبون جديد',
+            style: TextStyle(fontWeight: FontWeight.w900)),
       ),
     );
   }
 
-  // Feature 2: Detailed Customer Ledger Bottom Sheet & Due Date
   void _showCustomerLedgerSheet(CustomerItem c) {
     final dueCtrl = TextEditingController(text: c.dueDate ?? '');
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: kNavyMid,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        side: BorderSide(color: kCyanGlow, width: 1.4),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) {
@@ -3191,7 +3737,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -3204,26 +3749,24 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                 style: const TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0F5132),
+                                  color: kCyanGlow,
                                 ),
                               ),
                               Text(
                                 'الهاتف: ${c.phone.isEmpty ? "غير مسجل" : c.phone} | الدين الحالي: ${c.totalDebt.toStringAsFixed(0)} د.ج',
                                 style: const TextStyle(
-                                    fontSize: 12, color: Colors.black54),
+                                    fontSize: 12, color: Colors.white70),
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: const Icon(Icons.close, color: Colors.white),
                           onPressed: () => Navigator.pop(ctx),
                         ),
                       ],
                     ),
-                    const Divider(),
-
-                    // Due Date Picker & Input Row
+                    const Divider(color: Colors.white24),
                     Row(
                       children: [
                         Expanded(
@@ -3234,7 +3777,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                   'موعد التسديد المتفق عليه (مثال: 2026-11-30)',
                               prefixIcon: Icon(Icons.event_available, size: 18),
                               isDense: true,
-                              border: OutlineInputBorder(),
                             ),
                             onSubmitted: (val) {
                               setState(() => c.dueDate = val.trim());
@@ -3247,7 +3789,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         IconButton(
                           tooltip: 'اختيار تاريخ من التقويم',
                           icon: const Icon(Icons.calendar_month,
-                              color: Color(0xFF0F5132)),
+                              color: kOrangeGold),
                           onPressed: () async {
                             final picked = await showDatePicker(
                               context: ctx,
@@ -3268,8 +3810,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F5132),
-                            foregroundColor: Colors.white,
+                            backgroundColor: kCyanGlow,
+                            foregroundColor: kNavyDeep,
                           ),
                           onPressed: () {
                             setState(() => c.dueDate = dueCtrl.text.trim());
@@ -3282,31 +3824,34 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               ),
                             );
                           },
-                          child: const Text('حفظ الموعد'),
+                          child: const Text('حفظ الموعد',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 10),
-
-                    // Summary Pills (Total Taken vs Total Paid vs Remaining)
                     Row(
                       children: [
                         Expanded(
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.redAccent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color:
+                                      Colors.redAccent.withValues(alpha: 0.4)),
                             ),
                             child: Column(
                               children: [
                                 const Text('إجمالي ما أخذ',
-                                    style: TextStyle(fontSize: 11)),
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white70)),
                                 Text(
                                   '${totalTaken.toStringAsFixed(0)} د.ج',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.red.shade800),
+                                      color: Colors.redAccent),
                                 ),
                               ],
                             ),
@@ -3317,18 +3862,21 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              borderRadius: BorderRadius.circular(8),
+                              color: kEmeraldBright.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: kEmeraldBright.withValues(alpha: 0.4)),
                             ),
                             child: Column(
                               children: [
                                 const Text('إجمالي ما سدد',
-                                    style: TextStyle(fontSize: 11)),
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white70)),
                                 Text(
                                   '${totalPaid.toStringAsFixed(0)} د.ج',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade800),
+                                      color: kEmeraldBright),
                                 ),
                               ],
                             ),
@@ -3339,18 +3887,21 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.amber.shade50,
-                              borderRadius: BorderRadius.circular(8),
+                              color: kOrangeGold.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: kOrangeGold.withValues(alpha: 0.4)),
                             ),
                             child: Column(
                               children: [
                                 const Text('الرصيد المتبقي',
-                                    style: TextStyle(fontSize: 11)),
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white70)),
                                 Text(
                                   '${c.totalDebt.toStringAsFixed(0)} د.ج',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0F5132)),
+                                      color: kOrangeGold),
                                 ),
                               ],
                             ),
@@ -3359,21 +3910,20 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-
                     const Text(
                       'سجل حركات الحساب بالتاريخ (السلع المسحوبة والدفعات المسددة):',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Colors.white),
                     ),
                     const SizedBox(height: 6),
-
-                    // Ledger Entries List
                     Expanded(
                       child: c.ledger.isEmpty
                           ? const Center(
                               child: Text(
                                 'لا توجد حركات تفصيلية مسجلة لهذا الزبون بعد.',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(color: Colors.white60),
                               ),
                             )
                           : ListView.builder(
@@ -3391,31 +3941,39 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                     leading: CircleAvatar(
                                       radius: 16,
                                       backgroundColor: isDebt
-                                          ? Colors.red.shade100
-                                          : Colors.green.shade100,
+                                          ? Colors.redAccent
+                                              .withValues(alpha: 0.2)
+                                          : kEmeraldBright
+                                              .withValues(alpha: 0.2),
                                       child: Icon(
                                         isDebt
                                             ? Icons.arrow_upward
                                             : Icons.arrow_downward,
                                         size: 16,
-                                        color:
-                                            isDebt ? Colors.red : Colors.green,
+                                        color: isDebt
+                                            ? Colors.redAccent
+                                            : kEmeraldBright,
                                       ),
                                     ),
                                     title: Text(
                                       entry.note,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
                                     ),
-                                    subtitle: Text('التاريخ: ${entry.dateStr}'),
+                                    subtitle: Text(
+                                      'التاريخ: ${entry.dateStr}',
+                                      style: const TextStyle(
+                                          color: Colors.white60),
+                                    ),
                                     trailing: Text(
                                       '${isDebt ? "+" : "-"}${entry.amount.toStringAsFixed(0)} د.ج',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
                                         color: isDebt
-                                            ? Colors.red.shade700
-                                            : Colors.green.shade700,
+                                            ? Colors.redAccent
+                                            : kEmeraldBright,
                                       ),
                                     ),
                                   ),
@@ -3423,29 +3981,34 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               },
                             ),
                     ),
-
                     const SizedBox(height: 8),
-                    // Bottom Actions inside Sheet: Full WhatsApp Statement + SMS + Record Payment
                     Row(
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.shade700,
-                              foregroundColor: Colors.white,
+                              backgroundColor: kOrangeGold,
+                              foregroundColor: kNavyDeep,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            onPressed: () => _sendFullLedgerStatementWhatsApp(c),
+                            onPressed: () =>
+                                _sendFullLedgerStatementWhatsApp(c),
                             icon: const Icon(Icons.chat_outlined, size: 18),
                             label: const Text(
                               'إرسال كشف الحساب كاملاً عبر واتساب',
                               style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.bold),
+                                  fontSize: 12, fontWeight: FontWeight.w900),
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: kCyanGlow,
+                            side: const BorderSide(color: kCyanGlow),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                          ),
                           onPressed: () {
                             Navigator.pop(ctx);
                             _showPayDebtDialog(c);
@@ -3497,18 +4060,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          title: Text('تسديد دفعة (Versement) — ${c.name}'),
+          title: Text('تسديد دفعة (Versement) — ${c.name}',
+              style: const TextStyle(color: kCyanGlow, fontSize: 16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('الدين الحالي: ${c.totalDebt.toStringAsFixed(0)} د.ج'),
+              Text('الدين الحالي: ${c.totalDebt.toStringAsFixed(0)} د.ج',
+                  style: const TextStyle(color: kOrangeGold)),
               const SizedBox(height: 10),
               TextField(
                 controller: ctrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'المبلغ المسدد الآن (د.ج)',
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 10),
@@ -3516,7 +4080,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 controller: noteCtrl,
                 decoration: const InputDecoration(
                   labelText: 'ملاحظة (اختياري)',
-                  border: OutlineInputBorder(),
                 ),
               ),
             ],
@@ -3524,11 +4087,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('إلغاء')),
+                child: const Text('إلغاء',
+                    style: TextStyle(color: Colors.white70))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F5132),
-                foregroundColor: Colors.white,
+                backgroundColor: kEmeraldBright,
+                foregroundColor: kNavyDeep,
               ),
               onPressed: () {
                 final paid = double.tryParse(ctrl.text) ?? 0;
@@ -3550,7 +4114,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 }
                 Navigator.pop(ctx);
               },
-              child: const Text('تأكيد التسديد'),
+              child: const Text('تأكيد التسديد',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -3569,7 +4134,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          title: const Text('إضافة زبون جديد'),
+          title: const Text('إضافة زبون جديد',
+              style: TextStyle(color: kCyanGlow)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -3578,16 +4144,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     controller: nameCtrl,
                     decoration:
                         const InputDecoration(labelText: 'اسم الزبون أو المحل')),
+                const SizedBox(height: 8),
                 TextField(
                     controller: phoneCtrl,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                         labelText: 'رقم الهاتف (مثال: 213661...)')),
+                const SizedBox(height: 8),
                 TextField(
                     controller: debtCtrl,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                         labelText: 'رصيد الكريدي السابق (إن وجد)')),
+                const SizedBox(height: 8),
                 TextField(
                     controller: dueCtrl,
                     decoration: const InputDecoration(
@@ -3599,11 +4168,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('إلغاء')),
+                child: const Text('إلغاء',
+                    style: TextStyle(color: Colors.white70))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F5132),
-                foregroundColor: Colors.white,
+                backgroundColor: kCyanGlow,
+                foregroundColor: kNavyDeep,
               ),
               onPressed: () {
                 if (nameCtrl.text.trim().isEmpty) return;
@@ -3633,7 +4203,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 _saveData();
                 Navigator.pop(ctx);
               },
-              child: const Text('حفظ الزبون'),
+              child: const Text('حفظ الزبون',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
