@@ -639,7 +639,7 @@ class _DaftarSplashScreenState extends State<DaftarSplashScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'v2.1.0 • AR | FR | EN',
+                          'v2.2.0 • AR | FR | EN',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
