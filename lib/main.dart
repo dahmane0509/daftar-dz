@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -355,7 +356,307 @@ class DaftarDzApp extends StatelessWidget {
           ),
         );
       },
-      home: const MainHomeScreen(),
+      home: const DaftarSplashScreen(),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Animated Glowing Splash Screen (Mihrab-inspired Luxury Intro)
+// ---------------------------------------------------------------------------
+class DaftarSplashScreen extends StatefulWidget {
+  const DaftarSplashScreen({super.key});
+
+  @override
+  State<DaftarSplashScreen> createState() => _DaftarSplashScreenState();
+}
+
+class _DaftarSplashScreenState extends State<DaftarSplashScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _introCtrl;
+  late final AnimationController _pulseCtrl;
+  late final Animation<double> _scaleAnim;
+  late final Animation<double> _fadeAnim;
+  Timer? _navTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _introCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _scaleAnim = Tween<double>(begin: 0.25, end: 1.0).animate(
+      CurvedAnimation(parent: _introCtrl, curve: Curves.easeOutBack),
+    );
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _introCtrl,
+        curve: const Interval(0.0, 0.75, curve: Curves.easeIn),
+      ),
+    );
+
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _introCtrl.forward();
+
+    _navTimer = Timer(const Duration(seconds: 3), _navigateToHome);
+  }
+
+  void _navigateToHome() {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 750),
+        pageBuilder: (_, __, ___) => const MainHomeScreen(),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _navTimer?.cancel();
+    _introCtrl.dispose();
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const cyanBright = Color(0xFF29B6F6);
+    const orangeGold = Color(0xFFFF7A00);
+
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF050E1D),
+              Color(0xFF0B2447),
+              Color(0xFF133B6E),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: AnimatedBuilder(
+            animation: Listenable.merge([_introCtrl, _pulseCtrl]),
+            builder: (context, _) {
+              final pulse = _pulseCtrl.value;
+              final sweepPos = -1.2 + (2.4 * pulse);
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+                  // Glowing Animated Logo + Radial Halo + Shimmer Sweep
+                  FadeTransition(
+                    opacity: _fadeAnim,
+                    child: ScaleTransition(
+                      scale: _scaleAnim,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer RadialGradient Halo
+                          Container(
+                            width: 250 + (18 * pulse),
+                            height: 250 + (18 * pulse),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  cyanBright.withValues(
+                                      alpha: 0.34 + 0.14 * pulse),
+                                  orangeGold.withValues(
+                                      alpha: 0.22 + 0.10 * pulse),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.25, 0.62, 1.0],
+                              ),
+                            ),
+                          ),
+                          // Logo Box with Dual Pulsing BoxShadows & Light Sweep
+                          Container(
+                            width: 175,
+                            height: 175,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(38),
+                              border: Border.all(
+                                color: Color.lerp(
+                                    cyanBright, orangeGold, pulse * 0.6)!,
+                                width: 2.4,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: cyanBright.withValues(
+                                      alpha: 0.45 + 0.25 * pulse),
+                                  blurRadius: 28 + (16 * pulse),
+                                  spreadRadius: 2 + (4 * pulse),
+                                  offset: const Offset(-4, -4),
+                                ),
+                                BoxShadow(
+                                  color: orangeGold.withValues(
+                                      alpha: 0.38 + 0.25 * pulse),
+                                  blurRadius: 26 + (14 * pulse),
+                                  spreadRadius: 1 + (3 * pulse),
+                                  offset: const Offset(5, 6),
+                                ),
+                              ],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.asset(
+                                  'assets/images/app_icon.png',
+                                  fit: BoxFit.cover,
+                                ),
+                                // Shimmer / Light Sweep effect crossing over the logo
+                                IgnorePointer(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment(sweepPos - 0.5, -1.0),
+                                        end: Alignment(sweepPos + 0.5, 1.0),
+                                        colors: [
+                                          Colors.white.withValues(alpha: 0.0),
+                                          Colors.white.withValues(alpha: 0.28),
+                                          Colors.white.withValues(alpha: 0.0),
+                                        ],
+                                        stops: const [0.0, 0.5, 1.0],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  // Bottom Gradual Texts
+                  Opacity(
+                    opacity: _fadeAnim.value,
+                    child: Column(
+                      children: [
+                        Text(
+                          'دفتر الجملة الذكي',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                            shadows: [
+                              Shadow(
+                                color: cyanBright.withValues(
+                                    alpha: 0.65 + 0.25 * pulse),
+                                blurRadius: 18,
+                              ),
+                              Shadow(
+                                color: orangeGold.withValues(alpha: 0.4),
+                                blurRadius: 28,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [
+                              Colors.white,
+                              cyanBright,
+                              orangeGold,
+                            ],
+                          ).createShader(bounds),
+                          child: const Text(
+                            'DaftarDZ',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 2.2,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: cyanBright.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: const Text(
+                            'الإدارة الذكية لتجارة الجملة والتجزئة',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFE2F1FF),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(flex: 2),
+                  // Sleek Golden/Cyan Loading Progress Bar at the bottom
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 56),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: SizedBox(
+                            height: 5,
+                            child: LinearProgressIndicator(
+                              backgroundColor:
+                                  Colors.white.withValues(alpha: 0.12),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color.lerp(cyanBright, orangeGold, pulse)!,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'v2.1.0 • AR | FR | EN',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white.withValues(alpha: 0.6),
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }
@@ -899,7 +1200,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(
-        'assets/logo.jpg',
+        'assets/images/app_icon.png',
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => Container(
           decoration: const BoxDecoration(
